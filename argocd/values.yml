@@ -1,0 +1,51 @@
+
+global:
+  # Default affinity preset for all components
+  affinity:
+    # -- Default pod anti-affinity rules. Either: `none`, `soft` or `hard`
+    podAntiAffinity: soft
+    # Node affinity rules
+    nodeAffinity:
+      # -- Default node affinity rules. Either: `none`, `soft` or `hard`
+      type: hard
+      # -- Default match expressions for node affinity
+      matchExpressions:
+        []
+        # - key: topology.kubernetes.io/zone
+        #   operator: In
+        #   values:
+        #    - antarctica-east1
+        #    - antarctica-west1
+  # change with your domains        
+  domain: argocd.ilhamellya.com 
+
+certificate:
+  # it will create you HTTPS access trough your ingress
+  enabled: true
+
+server:
+  # replica: 2
+  # adding extraargs to bypass insecure access to internal grpc    
+  extraArgs:
+    - --insecure
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    annotations:
+      nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+      nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+    tls: true
+
+crds:
+  install: false
+
+# argo-cm additonal configuration
+configs:
+  # default user for developer with predefined roles
+  cm:
+    accounts.grievous: login
+  rbac:
+    policy.csv: |
+      p, grievous, applications, get, test/test*, allow
+      p, grievous, applications, action/apps/Deployment/restart, test/test*, allow
