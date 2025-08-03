@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: env-check
+  labels:
+    app: env-check
+  namespace: todo
+spec:
+  selector:
+    matchLabels:
+      app: env-check
+  replicas: 1
+  template:
+    metadata:
+      annotations:
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/agent-inject-status: "update"
+        vault.hashicorp.com/role: "todo-app"
+        vault.hashicorp.com/agent-inject-secret-env.txt: "internal/data/todo"
+        vault.hashicorp.com/agent-inject-template-env.txt: |
+          {{- with secret "internal/data/todo" -}}
+          DB_PORT={{ .Data.data.DB_PORT }}
+          DB_HOST={{ .Data.data.DB_HOST }}
+          DB_PASSWORD={{ .Data.data.DB_PASSWORD }}
+          DB_USER={{ .Data.data.DB_USER }}
+          DB_DATABASE={{ .Data.data.DB_DATABASE }}
+          {{- end -}}
+        vault.hashicorp.com/agent-inject-file-env.txt: ".env"
+      labels:
+        app: env-check
+    spec:
+      serviceAccountName: todo-app
+      containers:
+        - name: env-check
+          image: busybox
+          command: ["/bin/sh"]
+          args:
+            [
+              "-c",
+              "while true; do echo $(cat /vault/secrets/.env); sleep 5; done",
+            ]
