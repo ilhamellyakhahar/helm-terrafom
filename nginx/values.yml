@@ -1,0 +1,19 @@
+controller:
+  # Enable ingress class by name
+  ingressClassByName: true
+  
+  # Configure ingress class resource
+  ingressClassResource:
+    controllerValue: "k8s.io/ingress-nginx"
+    enabled: true
+    name: "nginx"
+  
+  # Service configuration
+  service:
+    externalTrafficPolicy: "Local"
+  
+  # Set as default ingress controller
+  setAsDefaultIngress: true
+  
+  # Number of replicas
+  replicaCount: 3
